@@ -84,6 +84,13 @@ public struct F5TTSLoadConfig {
         self.repoId = repoId
         self.quantization = quantization
     }
+
+    public static func fourBitDefault() -> F5TTSLoadConfig {
+        F5TTSLoadConfig(
+            repoId: "alandao/f5-tts-mlx-4bit",
+            quantization: .none // weights are already 4-bit specific
+        )
+    }
 }
 
 public class F5TTS: Module {
@@ -347,6 +354,17 @@ public extension F5TTS {
             repoId: repoId,
             quantization: .bits(4)
         )
+        return try await fromPretrained(config: config, downloadProgress: downloadProgress)
+    }
+
+    /// Load the dedicated 4-bit repository weights directly.
+    ///
+    /// This path does not apply additional Swift-side quantization since the downloaded
+    /// weights are already 4-bit specific.
+    public static func fromPretrained4BitQuantizedRepo(
+        downloadProgress: ((Progress) -> Void)? = nil
+    ) async throws -> F5TTS {
+        let config = F5TTSLoadConfig.fourBitDefault()
         return try await fromPretrained(config: config, downloadProgress: downloadProgress)
     }
 

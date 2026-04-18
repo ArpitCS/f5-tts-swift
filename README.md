@@ -27,6 +27,27 @@ let f5tts = try await F5TTS.fromPretrained(repoId: "lucasnewman/f5-tts-mlx")
 let generatedAudio = try await f5tts.generate(text: "The quick brown fox jumped over the lazy dog.")
 ```
 
+### 4-bit loading options
+
+You can run F5-TTS in 4-bit mode in two ways:
+
+1. Swift-side quantization of the full-precision model:
+
+```swift
+let f5tts = try await F5TTS.fromPretrained4Bit(
+    repoId: "lucasnewman/f5-tts-mlx"
+)
+```
+
+2. Directly load the dedicated 4-bit repository:
+
+```swift
+let f5tts = try await F5TTS.fromPretrained4BitQuantizedRepo()
+```
+
+The first option downloads full-precision weights and quantizes eligible layers in Swift at load time.
+The second option downloads 4-bit-specific weights from `alandao/f5-tts-mlx-4bit` and skips extra Swift-side quantization.
+
 The result is an MLXArray with 24kHz audio samples.
 
 If you want to use your own reference audio sample, make sure it's a mono, 24kHz wav file of around 5-10 seconds:
