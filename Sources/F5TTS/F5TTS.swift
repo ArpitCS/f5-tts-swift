@@ -327,7 +327,8 @@ public extension F5TTS {
         config: F5TTSLoadConfig,
         downloadProgress: ((Progress) -> Void)? = nil
     ) async throws -> F5TTS {
-        let modelDirectoryURL = try await Hub.snapshot(from: config.repoId, matching: [".safetensors", ".txt"]) { progress in
+        // Hub snapshot matching expects extensions without a leading dot.
+        let modelDirectoryURL = try await Hub.snapshot(from: config.repoId, matching: ["safetensors", "txt"]) { progress in
             downloadProgress?(progress)
         }
         let model = try self.fromPretrained(modelDirectoryURL: modelDirectoryURL)
