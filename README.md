@@ -27,7 +27,31 @@ let f5tts = try await F5TTS.fromPretrained(repoId: "lucasnewman/f5-tts-mlx")
 let generatedAudio = try await f5tts.generate(text: "The quick brown fox jumped over the lazy dog.")
 ```
 
-### 4-bit loading options
+### 4-bit quantized usage
+
+```swift
+// Full precision (existing)
+let f5tts = try await F5TTS.fromPretrained(repoId: "lucasnewman/f5-tts-mlx")
+
+// 4-bit quantization applied in Swift
+let f5tts4 = try await F5TTS.fromPretrained4Bit()
+
+// 4-bit HF repo without additional quantization
+let f5tts4Repo = try await F5TTS.fromPretrained4BitQuantizedRepo()
+```
+
+```bash
+# full precision
+swift run f5-tts-generate --text "Hello"
+
+# 4-bit quantization from the original repo
+swift run f5-tts-generate --text "Hello" --q 4
+
+# 4-bit pre-quantized repo
+swift run f5-tts-generate --text "Hello" --model alandao/f5-tts-mlx-4bit
+```
+
+All existing features work identically in 4-bit mode, including reference audio, ODE methods, cfg, sway, speed, and seed.
 
 You can run F5-TTS in 4-bit mode in two ways:
 
