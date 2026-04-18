@@ -46,6 +46,14 @@ let package = Package(
                 .product(name: "MLX", package: "mlx-swift"),
             ],
             path: "Sources/f5-tts-generate"
+        ),
+        .testTarget(
+            name: "F5TTSTests",
+            dependencies: [
+                "F5TTS",
+                .product(name: "MLX", package: "mlx-swift"),
+            ],
+            path: "Tests/F5TTSTests"
         )
     ]
 )
