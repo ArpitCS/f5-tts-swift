@@ -6,6 +6,11 @@ import Vocos
 
 @main
 struct GenerateAudio: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+        abstract: "Generate speech audio with F5-TTS.",
+        discussion: "Example:\n  swift run f5-tts-generate --text \"Hello\" --q 4"
+    )
+
     @Argument(help: "Text to generate speech from")
     var text: String
     
@@ -18,8 +23,11 @@ struct GenerateAudio: AsyncParsableCommand {
     @Option(name: .long, help: "Text spoken in the reference audio")
     var refAudioText: String?
     
-    @Option(name: .long, help: "Model name to use")
+    @Option(name: .long, help: "Model repo to use")
     var model: String = "lucasnewman/f5-tts-mlx"
+
+    @Option(name: .long, help: "Quantization bits (e.g. 4 or 8). Omit or 0 for full precision.")
+    var q: Int?
     
     @Option(name: .long, help: "Output path for the generated audio")
     var outputPath: String = "output.wav"
@@ -43,9 +51,17 @@ struct GenerateAudio: AsyncParsableCommand {
     var seed: Int?
     
     func run() async throws {
-        print("Loading F5-TTS model...")
-        let f5tts = try await F5TTS.fromPretrained(repoId: model) { progress in
-            print("  -- \(progress.completedUnitCount) of \(progress.totalUnitCount)")
+        let quantization: F5TTSQuantization
+        if let q, q > 0 {
+            quantization = .bits(q)
+        } else {
+            quantization = .none
+        }
+
+        let config = F5TTSLoadConfig(repoId: model, quantization: quantization)
+        print("Loading F5-TTS model from \(config.repoId) with quantization: \(config.quantization)")
+        let f5tts = try await F5TTS.fromPretrained(config: config) { progress in
+            print(" -- \(progress.completedUnitCount) of \(progress.totalUnitCount)")
         }
         
         let startTime = Date()
