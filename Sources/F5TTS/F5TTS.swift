@@ -335,6 +335,21 @@ public extension F5TTS {
         return try await fromPretrained(config: config, downloadProgress: downloadProgress)
     }
 
+    /// Load a model from a full-precision repository and apply 4-bit quantization in Swift.
+    ///
+    /// This does not require a dedicated 4-bit Hugging Face repository; it downloads the
+    /// standard full-precision weights and then quantizes eligible internal layers at load time.
+    public static func fromPretrained4Bit(
+        repoId: String = "lucasnewman/f5-tts-mlx",
+        downloadProgress: ((Progress) -> Void)? = nil
+    ) async throws -> F5TTS {
+        let config = F5TTSLoadConfig(
+            repoId: repoId,
+            quantization: .bits(4)
+        )
+        return try await fromPretrained(config: config, downloadProgress: downloadProgress)
+    }
+
     static func fromPretrained(modelDirectoryURL: URL) throws -> F5TTS {
         let modelURL = modelDirectoryURL.appendingPathComponent("model.safetensors")
         let modelWeights = try loadArrays(url: modelURL)
