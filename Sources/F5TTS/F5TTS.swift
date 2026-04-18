@@ -411,7 +411,26 @@ public extension F5TTS {
         _ model: F5TTS,
         quantization: F5TTSQuantization
     ) throws -> F5TTS {
-        // temporary stub, just return model
+        // Mirrors the f5-tts-mlx-quantized / alandao blog pattern:
+        // nn.quantize(model, bits=bit, class_predicate=lambda _, m: isinstance(m, nn.Linear) and ...)
+        // We only quantize eligible internal Linear layers of the provided F5TTS model.
+        guard case .bits(let bits) = quantization, (bits == 4 || bits == 8) else {
+            return model
+        }
+
+        quantize(model: model, groupSize: 64, bits: bits) { _, module in
+            guard let linear = module as? Linear else {
+                return false
+            }
+
+            // Keep parity with the Python gating on Linear weight shape divisibility.
+            // Linear weight is [output, input], and we only quantize when all dims are multiples of 64.
+            return linear.weight.shape.allSatisfy { $0 % 64 == 0 }
+        }
+
+        // Force realization of the potentially updated (quantized) module parameters.
+        MLX.eval(model.parameters())
+
         return model
     }
 }
