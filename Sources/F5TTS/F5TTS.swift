@@ -68,6 +68,24 @@ func odeint_rk4(fun: (Float, MLXArray) -> MLXArray, y0: MLXArray, t: MLXArray) -
     return MLX.stacked(ys)
 }
 
+public enum F5TTSQuantization: Equatable {
+    case none
+    case bits(Int) // e.g. 4 or 8
+}
+
+public struct F5TTSLoadConfig {
+    public var repoId: String
+    public var quantization: F5TTSQuantization
+
+    public init(
+        repoId: String = "lucasnewman/f5-tts-mlx",
+        quantization: F5TTSQuantization = .none
+    ) {
+        self.repoId = repoId
+        self.quantization = quantization
+    }
+}
+
 public class F5TTS: Module {
     public enum ODEMethod: String {
         case euler
