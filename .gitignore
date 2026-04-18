@@ -4,6 +4,10 @@
 #
 # gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
 
+## Custom & MacOS
+.DS_Store
+copilot-instructions.md
+
 ## User settings
 xcuserdata/
 
