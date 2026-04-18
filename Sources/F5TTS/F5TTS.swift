@@ -316,11 +316,23 @@ public class F5TTS: Module {
 // MARK: - Pretrained Models
 
 public extension F5TTS {
-    static func fromPretrained(repoId: String, downloadProgress: ((Progress) -> Void)? = nil) async throws -> F5TTS {
-        let modelDirectoryURL = try await Hub.snapshot(from: repoId, matching: ["*.safetensors", "*.txt"]) { progress in
+    public static func fromPretrained(
+        config: F5TTSLoadConfig,
+        downloadProgress: ((Progress) -> Void)? = nil
+    ) async throws -> F5TTS {
+        let modelDirectoryURL = try await Hub.snapshot(from: config.repoId, matching: [".safetensors", ".txt"]) { progress in
             downloadProgress?(progress)
         }
-        return try self.fromPretrained(modelDirectoryURL: modelDirectoryURL)
+        let model = try self.fromPretrained(modelDirectoryURL: modelDirectoryURL)
+        return try self.applyQuantizationIfNeeded(model, quantization: config.quantization)
+    }
+
+    public static func fromPretrained(
+        repoId: String,
+        downloadProgress: ((Progress) -> Void)? = nil
+    ) async throws -> F5TTS {
+        let config = F5TTSLoadConfig(repoId: repoId, quantization: .none)
+        return try await fromPretrained(config: config, downloadProgress: downloadProgress)
     }
 
     static func fromPretrained(modelDirectoryURL: URL) throws -> F5TTS {
@@ -393,6 +405,14 @@ public extension F5TTS {
         try f5tts.update(parameters: ModuleParameters.unflattened(modelWeights), verify: [.all])
 
         return f5tts
+    }
+
+    private static func applyQuantizationIfNeeded(
+        _ model: F5TTS,
+        quantization: F5TTSQuantization
+    ) throws -> F5TTS {
+        // temporary stub, just return model
+        return model
     }
 }
 
